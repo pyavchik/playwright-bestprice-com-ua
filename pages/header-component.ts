@@ -30,19 +30,19 @@ export class HeaderComponent {
   async search(term: string): Promise<void> {
     await this.searchInput.click();
     await this.searchInput.fill(term);
-    // Header search is a combobox with an autocomplete listbox. Submission via Enter
-    // can be intercepted by the dropdown depending on focus state, so wait briefly
-    // for the navigation and fall back to a direct URL navigation only if we are
-    // still not on the search results page.
-    await this.searchInput.press('Enter');
-    const onSearch = await this.page
-      .waitForURL(/\/poshuk(\?|$)/, { timeout: 5_000 })
+    // Header search is a combobox; pressing Enter on the input submits the form.
+    // Race: on slow runners the navigation can be in flight while a fallback
+    // page.goto() fires, producing "Navigation interrupted by another navigation".
+    // Subscribe to navigation BEFORE pressing Enter, then await both together.
+    const target = `/poshuk?q=${encodeURIComponent(term.trim())}`;
+    const navigated = this.page
+      .waitForURL(/\/poshuk(\?|$)/, { timeout: 15_000 })
       .then(() => true)
       .catch(() => false);
-    if (!onSearch && !/\/poshuk(\?|$)/.test(this.page.url())) {
-      await this.page.goto(`/poshuk?q=${encodeURIComponent(term.trim())}`, {
-        waitUntil: 'domcontentloaded',
-      });
+    await this.searchInput.press('Enter');
+    if (!(await navigated) && !/\/poshuk(\?|$)/.test(this.page.url())) {
+      // Enter genuinely didn't submit — navigate directly.
+      await this.page.goto(target, { waitUntil: 'domcontentloaded' });
     }
     // The autocomplete listbox can linger on Firefox/WebKit after navigation and
     // intercept clicks on result cards. Dismiss it before returning.
