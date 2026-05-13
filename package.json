@@ -1,0 +1,49 @@
+{
+  "name": "playwright-bestprice-com-ua",
+  "version": "1.0.0",
+  "description": "Playwright + TypeScript e2e automation framework for https://bestprice.com.ua",
+  "scripts": {
+    "test": "playwright test",
+    "test:all": "ALL_BROWSERS=true playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:mobile": "ALL_BROWSERS=true playwright test --grep @mobile",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "ALL_BROWSERS=true playwright test --project=firefox",
+    "test:webkit": "ALL_BROWSERS=true playwright test --project=webkit",
+    "report": "playwright show-report",
+    "install:browsers": "playwright install --with-deps",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"**/*.{ts,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,json,md}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "playwright",
+    "typescript",
+    "e2e",
+    "automation",
+    "ecommerce",
+    "bestprice"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "dotenv": "^16.4.7",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-playwright": "^2.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

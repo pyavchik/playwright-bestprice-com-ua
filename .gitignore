@@ -1,0 +1,14 @@
+node_modules/
+dist/
+playwright-report/
+test-results/
+allure-results/
+allure-report/
+.env
+.env.local
+*.log
+.DS_Store
+.idea/
+.vscode/
+coverage/
+.playwright-mcp/

@@ -1,0 +1,11 @@
+export { BasePage } from './base-page';
+export { HeaderComponent } from './header-component';
+export { FooterComponent } from './footer-component';
+export { HomePage } from './home-page';
+export { CatalogPage } from './catalog-page';
+export { SearchPage } from './search-page';
+export { ProductPage } from './product-page';
+export { CartPage } from './cart-page';
+export { LoginPage } from './login-page';
+export { RegisterPage } from './register-page';
+export { CheckoutPage } from './checkout-page';
