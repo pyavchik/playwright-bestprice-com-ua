@@ -20,6 +20,9 @@ jobs:
       CI: 'true'
       BASE_URL: ${{ vars.BASE_URL || 'https://bestprice.com.ua' }}
       TEST_MODE: 'false'
+      # Load the full project list (chromium / firefox / webkit / mobile) — the
+      # local default is chromium-only, but CI exercises every browser.
+      ALL_BROWSERS: 'true'
     steps:
       - uses: actions/checkout@v4
 
