@@ -6,12 +6,19 @@ const EPIC = 'Product';
 const FEATURE = 'Product detail page';
 
 test.describe('@regression @product Product page', () => {
+  /**
+   * Every test in this describe block starts already on a product detail page.
+   * Centralizing the search + click here removes the repeated step in every
+   * test body and keeps the assertions focused on the product page itself.
+   */
   test.beforeEach(async ({ homePage, searchPage }) => {
     await homePage.header.search(searchTerms.valid[0]);
-    await expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0);
+    await expect(searchPage.resultLinks.first()).toBeVisible({ timeout: 15_000 });
+    await searchPage.resultLinks.first().scrollIntoViewIfNeeded();
+    await searchPage.resultLinks.first().click();
   });
 
-  test('Product page opens from search listing', async ({ page, searchPage, productPage }) => {
+  test('Product page opens from search listing', async ({ page, productPage }) => {
     await allureMeta({
       epic: EPIC,
       feature: FEATURE,
@@ -22,17 +29,13 @@ test.describe('@regression @product Product page', () => {
       severity: 'critical',
     });
 
-    await step('Open first product from results', async () => {
-      await searchPage.resultLinks.first().scrollIntoViewIfNeeded();
-      await searchPage.resultLinks.first().click();
-    });
     await step('URL is /produkt/...', () => expect(page).toHaveURL(/\/produkt\//));
     await step('Product title is visible', () =>
       expect(productPage.title).toBeVisible({ timeout: 15_000 }),
     );
   });
 
-  test('Title, image and price are visible', async ({ searchPage, productPage }) => {
+  test('Title, image and price are visible', async ({ productPage }) => {
     await allureMeta({
       epic: EPIC,
       feature: FEATURE,
@@ -43,21 +46,17 @@ test.describe('@regression @product Product page', () => {
       severity: 'critical',
     });
 
-    await step('Open first product', async () => {
-      await searchPage.resultLinks.first().scrollIntoViewIfNeeded();
-      await searchPage.resultLinks.first().click();
-    });
     await step('Title is visible', () =>
       expect(productPage.title).toBeVisible({ timeout: 15_000 }),
     );
     await step('Image is visible', () => expect(productPage.image).toBeVisible());
     await step('Price is visible and contains ₴', async () => {
       await expect(productPage.price).toBeVisible();
-      expect(await productPage.getPriceText()).toMatch(/₴/);
+      await expect(productPage.price).toContainText('₴');
     });
   });
 
-  test('Add-to-cart button is visible', async ({ searchPage, productPage }) => {
+  test('Add-to-cart button is visible', async ({ productPage }) => {
     await allureMeta({
       epic: EPIC,
       feature: FEATURE,
@@ -68,10 +67,6 @@ test.describe('@regression @product Product page', () => {
       severity: 'critical',
     });
 
-    await step('Open first product', async () => {
-      await searchPage.resultLinks.first().scrollIntoViewIfNeeded();
-      await searchPage.resultLinks.first().click();
-    });
     await step('Add-to-cart button is visible', () =>
       expect(productPage.addToCartButton).toBeVisible({ timeout: 15_000 }),
     );
@@ -80,7 +75,7 @@ test.describe('@regression @product Product page', () => {
     );
   });
 
-  test('SKU and availability are displayed', async ({ searchPage, productPage }) => {
+  test('SKU and availability are displayed', async ({ productPage }) => {
     await allureMeta({
       epic: EPIC,
       feature: FEATURE,
@@ -91,11 +86,7 @@ test.describe('@regression @product Product page', () => {
       severity: 'normal',
     });
 
-    await step('Open first product', async () => {
-      await searchPage.resultLinks.first().scrollIntoViewIfNeeded();
-      await searchPage.resultLinks.first().click();
-    });
-    await step('Wait for product title', () =>
+    await step('Product title is visible', () =>
       expect(productPage.title).toBeVisible({ timeout: 15_000 }),
     );
     await step('SKU is visible', () => expect(productPage.sku).toBeVisible());
@@ -104,7 +95,7 @@ test.describe('@regression @product Product page', () => {
     );
   });
 
-  test('Breadcrumbs navigate back to home', async ({ page, searchPage, productPage }) => {
+  test('Breadcrumbs navigate back to home', async ({ page, productPage }) => {
     await allureMeta({
       epic: EPIC,
       feature: FEATURE,
@@ -115,10 +106,6 @@ test.describe('@regression @product Product page', () => {
       severity: 'minor',
     });
 
-    await step('Open first product', async () => {
-      await searchPage.resultLinks.first().scrollIntoViewIfNeeded();
-      await searchPage.resultLinks.first().click();
-    });
     await expect(productPage.title).toBeVisible({ timeout: 15_000 });
     await expect(productPage.breadcrumbs).toBeVisible();
     const home = productPage.breadcrumbs.getByRole('link', { name: /головна/i });

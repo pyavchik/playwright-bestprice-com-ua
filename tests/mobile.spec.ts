@@ -65,7 +65,7 @@ test.describe('@mobile Mobile responsive', () => {
       homePage.header.search(searchTerms.valid[0]),
     );
     await step('Results render', () =>
-      expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0),
+      expect(searchPage.resultLinks.first()).toBeVisible({ timeout: 15_000 }),
     );
   });
 });

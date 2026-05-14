@@ -7,8 +7,6 @@ export class CartPage extends BasePage {
   readonly header: HeaderComponent;
   readonly heading: Locator;
   readonly emptyState: Locator;
-  /** Each cart line item — derived from the per-item remove button's ancestor. */
-  readonly items: Locator;
   readonly itemLinks: Locator;
   readonly quantityInputs: Locator;
   readonly increaseButtons: Locator;
@@ -21,37 +19,35 @@ export class CartPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
+    const main = page.locator('main');
     this.header = new HeaderComponent(page);
     this.heading = page.getByRole('heading', { level: 1, name: /^кошик$/i });
-    this.emptyState = page.getByText(/ваш кошик порожній/i).first();
-    this.removeButtons = page.locator('main button[aria-label="Видалити з кошика"]');
-    this.items = this.removeButtons.locator(
-      'xpath=ancestor::*[.//a[contains(@href,"/produkt/")]][1]',
-    );
-    this.itemLinks = page.locator('main a[href^="/produkt/"]');
-    this.quantityInputs = page.locator('main input[aria-label="Кількість товару"]');
-    this.increaseButtons = page.locator('main button[aria-label="Збільшити кількість"]');
-    this.decreaseButtons = page.locator('main button[aria-label="Зменшити кількість"]');
-    this.clearCartButton = page.getByRole('button', { name: /очистити кошик/i });
-    this.checkoutButton = page
-      .getByRole('button', { name: /оформити замовлення/i })
-      .or(page.getByRole('link', { name: /оформити замовлення/i }))
+    this.emptyState = main.getByText(/ваш кошик порожній/i).first();
+    this.itemLinks = main.locator('a[href^="/produkt/"]');
+    this.quantityInputs = main.getByRole('spinbutton', { name: /кількість товару/i });
+    this.increaseButtons = main.getByRole('button', { name: /збільшити кількість/i });
+    this.decreaseButtons = main.getByRole('button', { name: /зменшити кількість/i });
+    this.removeButtons = main.getByRole('button', { name: /видалити з кошика/i });
+    this.clearCartButton = main.getByRole('button', { name: /очистити кошик/i });
+    this.checkoutButton = main
+      .getByRole('link', { name: /оформити замовлення/i })
+      .or(main.getByRole('button', { name: /оформити замовлення/i }))
       .first();
-    this.continueShoppingLink = page.getByRole('link', { name: /продовжити покупки/i });
-    // The "Разом:" total label is followed in the DOM by the amount in the same container.
-    this.totalAmount = page
-      .locator('main')
-      .getByText(/разом/i)
-      .locator('xpath=ancestor::*[self::div or self::section][1]')
-      .first();
+    this.continueShoppingLink = main.getByRole('link', { name: /продовжити покупки/i });
+    // The total label "Разом:" lives next to the amount in a small bottom panel.
+    this.totalAmount = main.getByText(/разом\s*:/i).first();
   }
 
-  firstItem(): Locator {
-    return this.items.first();
+  /**
+   * Line-item count. Each item has exactly one "Видалити з кошика" button, so the
+   * remove-button count is the canonical item count without an XPath ancestor walk.
+   */
+  itemCountLocator(): Locator {
+    return this.removeButtons;
   }
 
   async itemCount(): Promise<number> {
-    return this.items.count();
+    return this.removeButtons.count();
   }
 
   async setQuantity(index: number, value: number): Promise<void> {
@@ -79,17 +75,5 @@ export class CartPage extends BasePage {
 
   async goToCheckout(): Promise<void> {
     await this.checkoutButton.click();
-  }
-
-  async clear(): Promise<void> {
-    if ((await this.clearCartButton.count()) === 0) return;
-    if (
-      !(await this.clearCartButton
-        .first()
-        .isVisible()
-        .catch(() => false))
-    )
-      return;
-    await this.clearCartButton.first().click();
   }
 }

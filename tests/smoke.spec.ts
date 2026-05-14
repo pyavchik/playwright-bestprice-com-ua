@@ -58,11 +58,11 @@ test.describe('@smoke Home page', () => {
 
     await step('Scroll footer into view', () => homePage.footer.root.scrollIntoViewIfNeeded());
     await step('Footer is visible', () => expect(homePage.footer.root).toBeVisible());
-    await step('At least one phone link', async () =>
-      expect(await homePage.footer.phoneLinks.count()).toBeGreaterThan(0),
+    await step('At least one phone link', () =>
+      expect(homePage.footer.phoneLinks.first()).toBeVisible(),
     );
-    await step('At least one email link', async () =>
-      expect(await homePage.footer.emailLinks.count()).toBeGreaterThan(0),
+    await step('At least one email link', () =>
+      expect(homePage.footer.emailLinks.first()).toBeVisible(),
     );
   });
 
@@ -78,7 +78,7 @@ test.describe('@smoke Home page', () => {
     });
 
     await step('Wait for at least one product card', () =>
-      expect.poll(() => homePage.productCards.count(), { timeout: 15_000 }).toBeGreaterThan(0),
+      expect(homePage.productCards.first()).toBeVisible({ timeout: 15_000 }),
     );
   });
 });

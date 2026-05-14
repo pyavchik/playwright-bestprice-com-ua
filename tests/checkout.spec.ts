@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures/pages-fixture';
 import { allureMeta, step } from '../utils/allure';
-import { searchTerms } from '../test-data/search-terms';
+import { searchAndAddFirstResultToCart } from '../utils/test-flows';
 import { env } from '../utils/env';
 
 const EPIC = 'Checkout';
@@ -32,9 +32,7 @@ test.describe('@regression @checkout Checkout', () => {
 
     await step('Open empty cart', () => cartPage.goto());
     await step('Empty state visible', () => expect(cartPage.emptyState).toBeVisible());
-    await step('No checkout CTA', async () =>
-      expect(await cartPage.checkoutButton.count()).toBe(0),
-    );
+    await step('No checkout CTA', () => expect(cartPage.checkoutButton).toHaveCount(0));
   });
 
   test('Checkout CTA appears once a product is added to cart', async ({
@@ -49,30 +47,48 @@ test.describe('@regression @checkout Checkout', () => {
       story: 'Checkout CTA appears for non-empty carts',
       description:
         'After adding a product, the cart page must surface a visible "Оформити замовлення" CTA. ' +
-        'Production safety: the test never submits a real order — it only clicks checkout when ' +
-        'TEST_MODE=true, otherwise it stops at the CTA assertion.',
+        'This test never clicks the CTA — see the TEST_MODE-gated test below for the click path.',
       severity: 'critical',
-      tags: ['safety'],
     });
 
-    await step('Search and add a product', async () => {
-      await homePage.header.search(searchTerms.valid[0]);
-      await expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0);
-      await searchPage.results.first().locator('button[aria-label="Додати в кошик"]').click();
-      await expect.poll(() => homePage.header.getCartCount(), { timeout: 10_000 }).toBe(1);
-    });
+    await searchAndAddFirstResultToCart({ page, header: homePage.header, searchPage });
     await step('Open cart', () => page.goto('/koshyk', { waitUntil: 'domcontentloaded' }));
     await step('Checkout CTA is visible', () =>
       expect(cartPage.checkoutButton).toBeVisible({ timeout: 10_000 }),
     );
+  });
 
-    if (env.testMode) {
-      await step('TEST_MODE=true — click checkout', () => cartPage.goToCheckout());
-    } else {
-      test.info().annotations.push({
-        type: 'safety',
-        description: 'TEST_MODE=false — stopped before clicking checkout submit',
-      });
-    }
+  test('Click "Оформити замовлення" (TEST_MODE only)', async ({
+    page,
+    homePage,
+    searchPage,
+    cartPage,
+  }) => {
+    // Production-safety gate: this is the ONLY test that actually clicks the
+    // checkout CTA, and it only runs when explicitly opted in via TEST_MODE=true.
+    // The plugin warns on every .skip() call by default — this one is load-bearing,
+    // so silence the rule with a targeted disable instead of a global allow.
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(
+      !env.testMode,
+      'TEST_MODE=false — skipping the only test that clicks checkout. Set TEST_MODE=true to enable.',
+    );
+
+    await allureMeta({
+      epic: EPIC,
+      feature: FEATURE,
+      story: 'TEST_MODE=true: actually proceed to checkout',
+      description:
+        'Adds a product, opens /koshyk and clicks the "Оформити замовлення" CTA. ' +
+        'Production safety: this test is skipped unless TEST_MODE=true, so the suite never ' +
+        'navigates past the cart on the live storefront.',
+      severity: 'critical',
+      tags: ['safety', 'test-mode'],
+    });
+
+    await searchAndAddFirstResultToCart({ page, header: homePage.header, searchPage });
+    await step('Open cart', () => page.goto('/koshyk', { waitUntil: 'domcontentloaded' }));
+    await step('Checkout CTA is visible', () => expect(cartPage.checkoutButton).toBeVisible());
+    await step('Click checkout', () => cartPage.goToCheckout());
   });
 });

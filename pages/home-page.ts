@@ -9,7 +9,8 @@ export class HomePage extends BasePage {
   readonly footer: FooterComponent;
   readonly promoRegion: Locator;
   readonly featuredHeading: Locator;
-  readonly productCards: Locator;
+  /** Per-card add-to-cart icon buttons rendered in the "Найкращі пропозиції" grid. */
+  readonly addToCartButtons: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -19,9 +20,13 @@ export class HomePage extends BasePage {
     this.featuredHeading = page
       .getByRole('heading', { name: /найкращі пропозиції|популярн/i })
       .first();
-    // A product card is any container with both a /produkt/ link and the "Додати в кошик" button.
-    this.productCards = page
-      .locator('button[aria-label="Додати в кошик"]')
-      .locator('xpath=ancestor::*[.//a[contains(@href,"/produkt/")]][1]');
+    // Every visible product card on the homepage exposes a "Додати в кошик" icon button —
+    // counting them is equivalent to counting cards, without an XPath ancestor walk.
+    this.addToCartButtons = page.locator('main').getByRole('button', { name: /^додати в кошик$/i });
+  }
+
+  /** Backwards-compatible alias kept so existing tests can keep calling `.productCards`. */
+  get productCards(): Locator {
+    return this.addToCartButtons;
   }
 }

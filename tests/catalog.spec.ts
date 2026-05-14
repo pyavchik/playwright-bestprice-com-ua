@@ -35,7 +35,7 @@ test.describe('@regression @catalog Category listing', () => {
 
     await step('Open category', () => catalogPage.goto());
     await step('At least one product card is rendered', () =>
-      expect.poll(() => catalogPage.productCards.count(), { timeout: 15_000 }).toBeGreaterThan(0),
+      expect(catalogPage.productCards.first()).toBeVisible({ timeout: 15_000 }),
     );
   });
 
@@ -53,21 +53,19 @@ test.describe('@regression @catalog Category listing', () => {
       severity: 'normal',
     });
 
+    const main = page.locator('main');
     await step('Open category', () => catalogPage.goto());
-    await step('Wait for product cards', () =>
-      expect.poll(() => catalogPage.productCards.count(), { timeout: 15_000 }).toBeGreaterThan(0),
-    );
     await step('Product links are present', () =>
-      expect(catalogPage.productLinks.first()).toBeVisible(),
+      expect(catalogPage.productLinks.first()).toBeVisible({ timeout: 15_000 }),
     );
     await step('Product images are present', () =>
-      expect(page.locator('main img').first()).toBeVisible(),
+      expect(main.locator('img').first()).toBeVisible(),
     );
     await step('Product titles (H2) are present', () =>
-      expect(page.locator('main h2').first()).toBeVisible(),
+      expect(main.getByRole('heading', { level: 2 }).first()).toBeVisible(),
     );
     await step('Prices in ₴ are present', () =>
-      expect(page.locator('main span').filter({ hasText: /₴/ }).first()).toBeVisible(),
+      expect(main.locator('span').filter({ hasText: /₴/ }).first()).toBeVisible(),
     );
     await step('Add-to-cart buttons are present', () =>
       expect(catalogPage.addToCartButtons.first()).toBeVisible(),

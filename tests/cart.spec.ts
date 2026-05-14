@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures/pages-fixture';
 import { allureMeta, step } from '../utils/allure';
-import { searchTerms } from '../test-data/search-terms';
+import { searchAndAddFirstResultToCart } from '../utils/test-flows';
 
 const EPIC = 'Cart';
 const FEATURE = 'Cart management';
@@ -36,7 +36,7 @@ test.describe('@regression @cart Cart', () => {
     await step('Open cart', () => cartPage.goto());
     await step('Cart heading is visible', () => expect(cartPage.heading).toBeVisible());
     await step('Empty-state message is visible', () => expect(cartPage.emptyState).toBeVisible());
-    await step('No line items', async () => expect(await cartPage.itemCount()).toBe(0));
+    await step('No line items', () => expect(cartPage.removeButtons).toHaveCount(0));
     await step('Continue-shopping link is visible', () =>
       expect(cartPage.continueShoppingLink).toBeVisible(),
     );
@@ -59,20 +59,11 @@ test.describe('@regression @cart Cart', () => {
       severity: 'blocker',
     });
 
-    await step('Search for a product', () => homePage.header.search(searchTerms.valid[0]));
-    await step('Wait for results', () =>
-      expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0),
-    );
-    await step('Add the first result to cart', () =>
-      searchPage.results.first().locator('button[aria-label="Додати в кошик"]').click(),
-    );
-    await step('Header counter reads 1', () =>
-      expect.poll(() => homePage.header.getCartCount(), { timeout: 10_000 }).toBe(1),
-    );
+    await searchAndAddFirstResultToCart({ page, header: homePage.header, searchPage });
     await step('Open cart page', () => page.goto('/koshyk', { waitUntil: 'domcontentloaded' }));
     await step('Cart heading is visible', () => expect(cartPage.heading).toBeVisible());
     await step('Exactly one line item', () =>
-      expect.poll(() => cartPage.itemCount(), { timeout: 10_000 }).toBe(1),
+      expect(cartPage.removeButtons).toHaveCount(1, { timeout: 10_000 }),
     );
     await step('Default quantity is 1', () =>
       expect(cartPage.quantityInputs.first()).toHaveValue('1'),
@@ -90,12 +81,7 @@ test.describe('@regression @cart Cart', () => {
       severity: 'critical',
     });
 
-    await step('Search and add a product', async () => {
-      await homePage.header.search(searchTerms.valid[0]);
-      await expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0);
-      await searchPage.results.first().locator('button[aria-label="Додати в кошик"]').click();
-      await expect.poll(() => homePage.header.getCartCount(), { timeout: 10_000 }).toBe(1);
-    });
+    await searchAndAddFirstResultToCart({ page, header: homePage.header, searchPage });
     await step('Open cart', () => page.goto('/koshyk', { waitUntil: 'domcontentloaded' }));
     await step('Quantity starts at 1', () =>
       expect(cartPage.quantityInputs.first()).toHaveValue('1'),
@@ -121,21 +107,16 @@ test.describe('@regression @cart Cart', () => {
       severity: 'critical',
     });
 
-    await step('Search and add a product', async () => {
-      await homePage.header.search(searchTerms.valid[0]);
-      await expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0);
-      await searchPage.results.first().locator('button[aria-label="Додати в кошик"]').click();
-      await expect.poll(() => homePage.header.getCartCount(), { timeout: 10_000 }).toBe(1);
-    });
+    await searchAndAddFirstResultToCart({ page, header: homePage.header, searchPage });
     await step('Open cart', () => page.goto('/koshyk', { waitUntil: 'domcontentloaded' }));
     await step('Wait for cart line item', () =>
-      expect.poll(() => cartPage.itemCount(), { timeout: 10_000 }).toBe(1),
+      expect(cartPage.removeButtons).toHaveCount(1, { timeout: 10_000 }),
     );
     await step('Remove the item', () => cartPage.removeItem(0));
     await step('Empty state appears', () =>
       expect(cartPage.emptyState).toBeVisible({ timeout: 10_000 }),
     );
-    await step('Cart is empty', async () => expect(await cartPage.itemCount()).toBe(0));
+    await step('Cart is empty', () => expect(cartPage.removeButtons).toHaveCount(0));
   });
 
   test('Cart persists after page reload', async ({ page, homePage, searchPage, cartPage }) => {
@@ -149,19 +130,14 @@ test.describe('@regression @cart Cart', () => {
       severity: 'critical',
     });
 
-    await step('Search and add a product', async () => {
-      await homePage.header.search(searchTerms.valid[0]);
-      await expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0);
-      await searchPage.results.first().locator('button[aria-label="Додати в кошик"]').click();
-      await expect.poll(() => homePage.header.getCartCount(), { timeout: 10_000 }).toBe(1);
-    });
+    await searchAndAddFirstResultToCart({ page, header: homePage.header, searchPage });
     await step('Open cart', () => page.goto('/koshyk', { waitUntil: 'domcontentloaded' }));
     await step('Wait for the item', () =>
-      expect.poll(() => cartPage.itemCount(), { timeout: 10_000 }).toBe(1),
+      expect(cartPage.removeButtons).toHaveCount(1, { timeout: 10_000 }),
     );
     await step('Reload page', () => cartPage.reload());
     await step('Item is still there', () =>
-      expect.poll(() => cartPage.itemCount(), { timeout: 10_000 }).toBe(1),
+      expect(cartPage.removeButtons).toHaveCount(1, { timeout: 10_000 }),
     );
   });
 });

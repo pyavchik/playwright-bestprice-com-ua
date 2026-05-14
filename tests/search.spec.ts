@@ -1,9 +1,20 @@
 import { test, expect } from '../fixtures/pages-fixture';
+import type { SearchPage } from '../pages/search-page';
 import { allureMeta, step } from '../utils/allure';
 import { searchTerms } from '../test-data/search-terms';
 
 const EPIC = 'Search';
 const FEATURE = 'Header search';
+
+/**
+ * Parse the result count out of the page H1 "Результати пошуку «X»(N товарів)".
+ * Lives at module scope so the test body itself stays free of conditionals.
+ */
+async function readResultCount(searchPage: SearchPage): Promise<number> {
+  const heading = (await searchPage.heading.textContent()) ?? '';
+  const match = heading.match(/(\d+)\s*товар/i);
+  return match ? Number(match[1]) : 0;
+}
 
 test.describe('@regression @search Search', () => {
   test('Search by valid keyword returns results', async ({ homePage, searchPage }) => {
@@ -24,7 +35,7 @@ test.describe('@regression @search Search', () => {
       expect(searchPage.heading).toContainText(searchTerms.valid[0], { timeout: 15_000 }),
     );
     await step('At least one result card is rendered', () =>
-      expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0),
+      expect(searchPage.resultLinks.first()).toBeVisible({ timeout: 15_000 }),
     );
   });
 
@@ -42,19 +53,17 @@ test.describe('@regression @search Search', () => {
     await step(`Search for "${searchTerms.valid[0]}"`, () =>
       homePage.header.search(searchTerms.valid[0]),
     );
-    await step('Wait for results', () =>
-      expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0),
+    await step('First product link is visible', () =>
+      expect(searchPage.resultLinks.first()).toBeVisible({ timeout: 15_000 }),
     );
-    const firstCard = searchPage.results.first();
-    await step('First card is visible', () => expect(firstCard).toBeVisible());
-    await step('First card has a /produkt/ link', () =>
-      expect(firstCard.locator('a[href^="/produkt/"]').first()).toBeVisible(),
+    await step('First H2 title is visible', () =>
+      expect(searchPage.resultTitles.first()).toBeVisible(),
     );
-    await step('First card has an H2 title', () =>
-      expect(firstCard.getByRole('heading', { level: 2 }).first()).toBeVisible(),
+    await step('First price (in ₴) is visible', () =>
+      expect(searchPage.resultPrices.first()).toBeVisible(),
     );
-    await step('First card shows a price in ₴', () =>
-      expect(firstCard.locator('span').filter({ hasText: /₴/ }).first()).toBeVisible(),
+    await step('First add-to-cart button is visible', () =>
+      expect(searchPage.firstAddToCartButton).toBeVisible(),
     );
   });
 
@@ -86,24 +95,18 @@ test.describe('@regression @search Search', () => {
       severity: 'normal',
     });
 
-    const readResultCount = async (): Promise<number> => {
-      const heading = (await searchPage.heading.textContent()) ?? '';
-      const match = heading.match(/(\d+)\s*товар/i);
-      return match ? Number(match[1]) : 0;
-    };
-
     await step(`Search for "${searchTerms.caseVariants[0]}"`, () =>
       homePage.header.search(searchTerms.caseVariants[0]),
     );
-    await expect.poll(readResultCount, { timeout: 15_000 }).toBeGreaterThan(0);
-    const lowerCount = await readResultCount();
+    await expect.poll(() => readResultCount(searchPage), { timeout: 15_000 }).toBeGreaterThan(0);
+    const lowerCount = await readResultCount(searchPage);
 
     await step('Return to home', () => page.goto('/'));
     await step(`Search for "${searchTerms.caseVariants[1]}"`, () =>
       homePage.header.search(searchTerms.caseVariants[1]),
     );
-    await expect.poll(readResultCount, { timeout: 15_000 }).toBeGreaterThan(0);
-    const upperCount = await readResultCount();
+    await expect.poll(() => readResultCount(searchPage), { timeout: 15_000 }).toBeGreaterThan(0);
+    const upperCount = await readResultCount(searchPage);
 
     await step('Counts are equal', () => expect(upperCount).toBe(lowerCount));
   });
@@ -123,7 +126,7 @@ test.describe('@regression @search Search', () => {
       homePage.header.search(searchTerms.withSpaces[0]),
     );
     await step('Results render', () =>
-      expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0),
+      expect(searchPage.resultLinks.first()).toBeVisible({ timeout: 15_000 }),
     );
     await step('Heading contains the trimmed keyword', () =>
       expect(searchPage.heading).toContainText('дриль'),
@@ -166,7 +169,7 @@ test.describe('@regression @search Search', () => {
     );
     await step('URL matches /poshuk?q=', () => expect(page).toHaveURL(/\/poshuk\?q=/));
     await step('Results render', () =>
-      expect.poll(() => searchPage.resultsCount(), { timeout: 15_000 }).toBeGreaterThan(0),
+      expect(searchPage.resultLinks.first()).toBeVisible({ timeout: 15_000 }),
     );
   });
 });

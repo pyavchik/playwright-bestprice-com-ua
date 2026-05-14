@@ -12,25 +12,26 @@ export class CatalogPage extends BasePage {
   readonly header: HeaderComponent;
   readonly heading: Locator;
   readonly breadcrumbs: Locator;
-  readonly productCards: Locator;
   readonly productLinks: Locator;
   readonly addToCartButtons: Locator;
 
   constructor(page: Page) {
     super(page);
+    const main = page.locator('main');
     this.header = new HeaderComponent(page);
-    this.heading = page.locator('main h1').first();
+    this.heading = main.locator('h1').first();
     this.breadcrumbs = page.getByRole('navigation', { name: /breadcrumb/i }).first();
-    this.productLinks = page.locator('main a[href^="/produkt/"]');
-    this.addToCartButtons = page.locator('main button[aria-label="Додати в кошик"]');
-    // Card container — each "add to cart" button has an ancestor that includes the product link.
-    this.productCards = this.addToCartButtons.locator(
-      'xpath=ancestor::*[.//a[contains(@href,"/produkt/")]][1]',
-    );
+    this.productLinks = main.locator('a[href^="/produkt/"]');
+    this.addToCartButtons = main.getByRole('button', { name: /^додати в кошик$/i });
   }
 
-  firstProductCard(): Locator {
-    return this.productCards.first();
+  /**
+   * Card count is the number of add-to-cart buttons (one per card). Kept as a
+   * getter so call sites can use Playwright's web-first matchers like
+   * `await expect(catalogPage.productCards).not.toHaveCount(0)`.
+   */
+  get productCards(): Locator {
+    return this.addToCartButtons;
   }
 
   async openFirstProduct(): Promise<void> {
