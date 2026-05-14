@@ -63,8 +63,20 @@ cp .env.example .env
 
 ## Run tests
 
+**Default — run the suite and open the Allure report with screenshots:**
+
 ```bash
-# Headless, all projects (chromium, firefox, webkit)
+npm run test:screenshots && npm run allure:open
+```
+
+That captures a screenshot for every test (passing or failing), generates the
+Allure HTML report, and opens it in your default browser. Use this whenever you
+want a shareable, human-readable run — for QA reviews, demos, or PR evidence.
+
+Other run modes:
+
+```bash
+# Plain run (no per-test screenshots; default Playwright behavior)
 npm test
 
 # Headed
@@ -83,7 +95,7 @@ npm run test:smoke         # @smoke
 npm run test:regression    # @regression
 npm run test:mobile        # @mobile only (Pixel 7 / iPhone 14)
 
-# Open the last HTML report
+# Open the last Playwright HTML report (separate from Allure)
 npm run report
 ```
 
@@ -92,10 +104,10 @@ npm run report
 Allure produces a richer, human-readable report with epics, suites, severities,
 descriptions, collapsible test steps, screenshots, videos, and Playwright traces.
 
-**Quick start — run the suite and open the report in one line:**
+**The default workflow already covers this:**
 
 ```bash
-npm test && npm run allure:open
+npm run test:screenshots && npm run allure:open
 ```
 
 `allure:open` regenerates the HTML report from `allure-results/` and opens it
@@ -103,14 +115,14 @@ in your default browser. Use `allure:serve` instead if you prefer the live
 server flow (boots a temporary HTTP server and opens the report):
 
 ```bash
-npm test && npm run allure:serve
+npm run test:screenshots && npm run allure:serve
 ```
 
 Step-by-step equivalents:
 
 ```bash
 # 1. Run the tests (allure-results/ is populated automatically)
-npm test
+npm run test:screenshots    # or `npm test` if you don't need pass-screenshots
 
 # 2. Generate the static HTML report (requires Java; preinstalled on most dev machines)
 npm run allure:generate    # → ./allure-report/index.html
@@ -122,24 +134,20 @@ npm run allure:open        # also runs allure:generate first
 npm run allure:clean
 ```
 
-### Capturing screenshots on passing tests
+### Capture controls
 
-By default, screenshots/videos/traces are only retained on failure (matching
-Playwright's `only-on-failure` / `retain-on-failure` defaults). To include
-visual evidence for **every** test in the Allure report:
+The `test:screenshots` script wraps `REPORT_SCREENSHOTS=true playwright test`.
+Three env vars opt in to richer artifacts (combinable, all default to `false`):
 
 ```bash
-# Single screenshot per test, attached to the report:
-npm run test:screenshots && npm run allure:open
-
-# Or set the env vars directly to pick what you want:
 REPORT_SCREENSHOTS=true npm test    # screenshots on every test
 REPORT_VIDEO=true npm test          # full video of every test
 REPORT_TRACE=true npm test          # Playwright trace on every test
 ```
 
-The env vars can be combined. They're opt-in because capturing a screenshot
-on every action slows test runs and inflates the `allure-results/` directory.
+When all three flags are off, Playwright still captures screenshots / videos /
+traces **on failure** — so failing runs always carry full diagnostic artifacts,
+and you only opt into pass-time captures when you want them in the report.
 
 **What's in the report:**
 
