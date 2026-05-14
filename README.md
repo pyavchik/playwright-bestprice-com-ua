@@ -92,6 +92,22 @@ npm run report
 Allure produces a richer, human-readable report with epics, suites, severities,
 descriptions, collapsible test steps, screenshots, videos, and Playwright traces.
 
+**Quick start — run the suite and open the report in one line:**
+
+```bash
+npm test && npm run allure:open
+```
+
+`allure:open` regenerates the HTML report from `allure-results/` and opens it
+in your default browser. Use `allure:serve` instead if you prefer the live
+server flow (boots a temporary HTTP server and opens the report):
+
+```bash
+npm test && npm run allure:serve
+```
+
+Step-by-step equivalents:
+
 ```bash
 # 1. Run the tests (allure-results/ is populated automatically)
 npm test
@@ -100,10 +116,7 @@ npm test
 npm run allure:generate    # → ./allure-report/index.html
 
 # 3. Open it locally
-npm run allure:open
-
-# Combined alternative — generate + serve in one step
-npm run allure:serve
+npm run allure:open        # also runs allure:generate first
 
 # Wipe inputs and previous report
 npm run allure:clean
