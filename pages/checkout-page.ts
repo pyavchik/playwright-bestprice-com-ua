@@ -36,10 +36,11 @@ export class CheckoutPage extends BasePage {
     this.addressInput = byIdOrName('address', /адрес|вулиц|address/i);
     this.deliveryOptions = page.getByText(/доставк|нова пошта/i).first();
     this.paymentOptions = page.getByText(/оплат|payment/i).first();
-    this.orderSummary = page.locator('main').getByText(/разом|до сплати/i).first();
-    this.submitButton = page
-      .getByRole('button', { name: /оформити|підтверд|замовити/i })
+    this.orderSummary = page
+      .locator('main')
+      .getByText(/разом|до сплати/i)
       .first();
+    this.submitButton = page.getByRole('button', { name: /оформити|підтверд|замовити/i }).first();
     this.validationErrors = page.locator(
       'main [class*="error" i], main [role="alert"], main [class*="destructive" i]',
     );

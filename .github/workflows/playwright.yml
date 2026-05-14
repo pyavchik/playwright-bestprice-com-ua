@@ -45,12 +45,20 @@ jobs:
       - name: Run tests
         run: npx playwright test --project=${{ matrix.project }}
 
-      - name: Upload Playwright report
+      - name: Upload Playwright HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-${{ matrix.project }}
           path: playwright-report
+          retention-days: 14
+
+      - name: Upload Allure raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ matrix.project }}
+          path: allure-results
           retention-days: 14
 
       - name: Upload test artifacts
@@ -60,3 +68,51 @@ jobs:
           name: test-results-${{ matrix.project }}
           path: test-results
           retention-days: 7
+
+  allure-report:
+    name: Allure report
+    needs: e2e
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Java (required by allure CLI)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download allure raw results from all browsers
+        uses: actions/download-artifact@v4
+        with:
+          path: allure-input
+          pattern: allure-results-*
+
+      - name: Merge browser results into a single allure-results dir
+        run: |
+          mkdir -p allure-results
+          # Copy every browser's results into one directory; UUIDs collide-free.
+          find allure-input -mindepth 2 -maxdepth 2 -type f -exec cp -n {} allure-results/ \;
+          echo "Merged $(ls allure-results | wc -l) files"
+
+      - name: Generate Allure HTML report
+        run: npm run allure:generate
+
+      - name: Upload Allure HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+          retention-days: 30

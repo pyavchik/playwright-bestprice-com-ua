@@ -12,3 +12,4 @@ allure-report/
 .vscode/
 coverage/
 .playwright-mcp/
+allure-input/

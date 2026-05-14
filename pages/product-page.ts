@@ -24,14 +24,23 @@ export class ProductPage extends BasePage {
     this.title = page.locator('main h1').first();
     this.image = page.locator('main img').first();
     this.price = page.locator('main span.text-2xl').filter({ hasText: /₴/ }).first();
-    this.availability = page.locator('main').getByText(/в наявності|немає в наявн|залишилось/i).first();
+    this.availability = page
+      .locator('main')
+      .getByText(/в наявності|немає в наявн|залишилось/i)
+      .first();
     this.addToCartButton = page
       .locator('main')
       .getByRole('button', { name: /^додати в кошик$/i })
       .first();
-    this.description = page.locator('main').getByText(/опис|характеристик/i).first();
+    this.description = page
+      .locator('main')
+      .getByText(/опис|характеристик/i)
+      .first();
     this.breadcrumbs = page.getByRole('navigation', { name: /breadcrumb/i }).first();
-    this.sku = page.locator('main').getByText(/арт[:\s]/i).first();
+    this.sku = page
+      .locator('main')
+      .getByText(/арт[:\s]/i)
+      .first();
   }
 
   async addToCart(): Promise<void> {

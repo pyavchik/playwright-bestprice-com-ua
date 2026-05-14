@@ -83,7 +83,13 @@ export class CartPage extends BasePage {
 
   async clear(): Promise<void> {
     if ((await this.clearCartButton.count()) === 0) return;
-    if (!(await this.clearCartButton.first().isVisible().catch(() => false))) return;
+    if (
+      !(await this.clearCartButton
+        .first()
+        .isVisible()
+        .catch(() => false))
+    )
+      return;
     await this.clearCartButton.first().click();
   }
 }

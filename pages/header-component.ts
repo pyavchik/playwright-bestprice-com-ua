@@ -109,7 +109,9 @@ export class HeaderComponent {
    * Read any of these to derive the count.
    */
   async getCartCount(): Promise<number> {
-    const drawerHeading = this.page.getByRole('heading', { level: 2, name: /^кошик\s*\(\d+\)/i }).first();
+    const drawerHeading = this.page
+      .getByRole('heading', { level: 2, name: /^кошик\s*\(\d+\)/i })
+      .first();
     if ((await drawerHeading.count()) > 0) {
       const text = (await drawerHeading.textContent()) ?? '';
       const match = text.match(/\((\d+)\)/);

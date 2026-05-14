@@ -11,6 +11,7 @@ End-to-end test automation for [bestprice.com.ua](https://bestprice.com.ua) buil
 - **Page Object Model** with shared `fixtures`
 - **dotenv** for environment configuration
 - **ESLint + Prettier** for code quality and formatting
+- **Allure Report** (with epics, severities, descriptions, steps, screenshots, videos, traces)
 - **Playwright HTML reporter** + JUnit output for CI
 - **GitHub Actions** workflow ready out of the box
 
@@ -85,6 +86,45 @@ npm run test:mobile        # @mobile only (Pixel 7 / iPhone 14)
 # Open the last HTML report
 npm run report
 ```
+
+## Allure report
+
+Allure produces a richer, human-readable report with epics, suites, severities,
+descriptions, collapsible test steps, screenshots, videos, and Playwright traces.
+
+```bash
+# 1. Run the tests (allure-results/ is populated automatically)
+npm test
+
+# 2. Generate the static HTML report (requires Java; preinstalled on most dev machines)
+npm run allure:generate    # → ./allure-report/index.html
+
+# 3. Open it locally
+npm run allure:open
+
+# Combined alternative — generate + serve in one step
+npm run allure:serve
+
+# Wipe inputs and previous report
+npm run allure:clean
+```
+
+**What's in the report:**
+
+- **Behaviors** view: tests grouped by Epic → Feature → Story (e.g. _Cart → Cart management → Add product to cart_).
+- **Suites** view: tests grouped by project / spec file / describe block.
+- **Severities** (`blocker`, `critical`, `normal`, `minor`, `trivial`) drive the priority dashboard.
+- **Descriptions**: every test has a plain-language paragraph explaining what it verifies and why.
+- **Steps**: each `await step('...')` call becomes a collapsible row, so you can see exactly which action failed.
+- **Attachments on failure**: screenshot, video, Playwright trace and the `error-context.md` (page snapshot) are attached automatically.
+- **Categories** (in `allure/categories.json`): failures are grouped as _Product defects_, _Locator timeouts_, _Navigation issues_, _Test infrastructure_, or _Flaky on retry_.
+- **Environment** widget: base URL, platform, Node version and CI flag.
+- **Executor** info: build/run number and a deep link back to the GitHub Actions run when running in CI.
+
+In CI, the dedicated `allure-report` job merges `allure-results-*` artifacts
+from every browser into a single report and publishes it as the `allure-report`
+workflow artifact — open the workflow run in GitHub Actions, download
+`allure-report.zip`, and open `index.html` from the unzipped folder.
 
 ### Tags
 

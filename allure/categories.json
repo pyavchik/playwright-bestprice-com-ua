@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Product defects",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*expect\\(.*\\).*"
+  },
+  {
+    "name": "Locator timeouts",
+    "matchedStatuses": ["failed", "broken"],
+    "messageRegex": ".*Timeout .* exceeded.*"
+  },
+  {
+    "name": "Navigation issues",
+    "matchedStatuses": ["broken"],
+    "messageRegex": ".*(Navigation|page\\.goto|ERR_).*"
+  },
+  {
+    "name": "Test infrastructure",
+    "matchedStatuses": ["broken"],
+    "messageRegex": ".*(Executable doesn't exist|Cannot find module|Project\\(s\\)).*"
+  },
+  {
+    "name": "Flaky on retry",
+    "matchedStatuses": ["passed"],
+    "flaky": true
+  }
+]

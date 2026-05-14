@@ -7,7 +7,9 @@ import type { Page } from '@playwright/test';
  */
 export async function dismissOverlays(page: Page): Promise<void> {
   const candidates = [
-    page.getByRole('dialog', { name: /встановити bestprice/i }).getByRole('button', { name: /закрити/i }),
+    page
+      .getByRole('dialog', { name: /встановити bestprice/i })
+      .getByRole('button', { name: /закрити/i }),
     page.getByRole('button', { name: /^закрити$/i }),
     page.getByRole('button', { name: /прийн|accept|погод|згод/i }),
   ];

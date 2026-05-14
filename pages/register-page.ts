@@ -18,13 +18,20 @@ export class RegisterPage extends BasePage {
     this.emailInput = page.locator('input#email, input[name="email"]').first();
     this.phoneInput = page.locator('input#phone, input[name="phone"]').first();
     this.passwordInput = page.locator('input#password, input[name="password"]').first();
-    this.submitButton = page.getByRole('button', { name: /зареєструватися|створити|реєстр/i }).first();
+    this.submitButton = page
+      .getByRole('button', { name: /зареєструватися|створити|реєстр/i })
+      .first();
     this.validationErrors = page.locator(
       'main [class*="error" i], main [role="alert"], main [class*="destructive" i]',
     );
   }
 
-  async fill(data: { name: string; email: string; phone: string; password: string }): Promise<void> {
+  async fill(data: {
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+  }): Promise<void> {
     await this.nameInput.fill(data.name);
     await this.emailInput.fill(data.email);
     await this.phoneInput.fill(data.phone);

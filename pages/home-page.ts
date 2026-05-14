@@ -16,7 +16,9 @@ export class HomePage extends BasePage {
     this.header = new HeaderComponent(page);
     this.footer = new FooterComponent(page);
     this.promoRegion = page.getByRole('region', { name: /промо-банери/i }).first();
-    this.featuredHeading = page.getByRole('heading', { name: /найкращі пропозиції|популярн/i }).first();
+    this.featuredHeading = page
+      .getByRole('heading', { name: /найкращі пропозиції|популярн/i })
+      .first();
     // A product card is any container with both a /produkt/ link and the "Додати в кошик" button.
     this.productCards = page
       .locator('button[aria-label="Додати в кошик"]')

@@ -41,6 +41,7 @@ const allProjects = [
 
 export default defineConfig({
   testDir: './tests',
+  globalSetup: './utils/global-setup.ts',
   fullyParallel: true,
   forbidOnly: isCI,
   // One local retry absorbs transient network/CDN flakiness against the live site
@@ -55,6 +56,20 @@ export default defineConfig({
     ['list'],
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
+    [
+      'allure-playwright',
+      {
+        resultsDir: 'allure-results',
+        detail: true,
+        suiteTitle: true,
+        environmentInfo: {
+          baseURL: BASE_URL,
+          platform: process.platform,
+          node: process.version,
+          ci: isCI ? 'true' : 'false',
+        },
+      },
+    ],
   ],
   outputDir: 'test-results/artifacts',
   use: {
