@@ -11,6 +11,15 @@ const isCI = !!process.env.CI;
 // to include Firefox, WebKit and the mobile emulations.
 const allBrowsers = (process.env.ALL_BROWSERS ?? '').toLowerCase() === 'true';
 
+// REPORT_SCREENSHOTS=true captures a screenshot AFTER every test (including passing
+// ones) and attaches it to the Allure / HTML report — useful for visual evidence
+// when sharing reports with non-engineers. Default stays on "only-on-failure" so
+// regular dev runs aren't slowed down by extra captures.
+const captureAllScreenshots = (process.env.REPORT_SCREENSHOTS ?? '').toLowerCase() === 'true';
+// REPORT_VIDEO=true and REPORT_TRACE=true are the analogues for videos and traces.
+const captureAllVideos = (process.env.REPORT_VIDEO ?? '').toLowerCase() === 'true';
+const captureAllTraces = (process.env.REPORT_TRACE ?? '').toLowerCase() === 'true';
+
 const allProjects = [
   {
     name: 'chromium',
@@ -77,9 +86,9 @@ export default defineConfig({
     actionTimeout: 15_000,
     navigationTimeout: 45_000,
     ignoreHTTPSErrors: true,
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
-    trace: 'retain-on-failure',
+    screenshot: captureAllScreenshots ? 'on' : 'only-on-failure',
+    video: captureAllVideos ? 'on' : 'retain-on-failure',
+    trace: captureAllTraces ? 'on' : 'retain-on-failure',
     locale: 'uk-UA',
     timezoneId: 'Europe/Kyiv',
     extraHTTPHeaders: {

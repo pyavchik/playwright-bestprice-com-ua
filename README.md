@@ -122,6 +122,25 @@ npm run allure:open        # also runs allure:generate first
 npm run allure:clean
 ```
 
+### Capturing screenshots on passing tests
+
+By default, screenshots/videos/traces are only retained on failure (matching
+Playwright's `only-on-failure` / `retain-on-failure` defaults). To include
+visual evidence for **every** test in the Allure report:
+
+```bash
+# Single screenshot per test, attached to the report:
+npm run test:screenshots && npm run allure:open
+
+# Or set the env vars directly to pick what you want:
+REPORT_SCREENSHOTS=true npm test    # screenshots on every test
+REPORT_VIDEO=true npm test          # full video of every test
+REPORT_TRACE=true npm test          # Playwright trace on every test
+```
+
+The env vars can be combined. They're opt-in because capturing a screenshot
+on every action slows test runs and inflates the `allure-results/` directory.
+
 **What's in the report:**
 
 - **Behaviors** view: tests grouped by Epic → Feature → Story (e.g. _Cart → Cart management → Add product to cart_).
