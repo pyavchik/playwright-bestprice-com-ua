@@ -43,7 +43,7 @@ jobs:
         continue-on-error: true
 
       - name: Run tests
-        run: npx playwright test --project=${{ matrix.project }}
+        run: REPORT_SCREENSHOTS=true npx playwright test --project=${{ matrix.project }}
 
       - name: Upload Playwright HTML report
         if: always()
