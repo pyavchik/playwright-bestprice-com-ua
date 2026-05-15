@@ -162,9 +162,12 @@ and you only opt into pass-time captures when you want them in the report.
 - **Executor** info: build/run number and a deep link back to the GitHub Actions run when running in CI.
 
 In CI, the dedicated `allure-report` job merges `allure-results-*` artifacts
-from every browser into a single report and publishes it as the `allure-report`
-workflow artifact — open the workflow run in GitHub Actions, download
-`allure-report.zip`, and open `index.html` from the unzipped folder.
+from every browser into a single report and publishes it to GitHub Pages:
+
+https://pyavchik.github.io/playwright-bestprice-com-ua/
+
+The same report is also uploaded as the `allure-report` workflow artifact for
+download/debugging from the GitHub Actions run.
 
 ### Tags
 
