@@ -78,9 +78,10 @@ jobs:
       contents: read
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # Pages deployment env is restricted to `main` by the `github-pages`
+    # environment branch policy, so we only attach it on push events. PRs still
+    # build the Allure HTML and upload it as a regular artifact.
+    environment: ${{ github.event_name == 'push' && 'github-pages' || '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -123,13 +124,16 @@ jobs:
           retention-days: 30
 
       - name: Setup GitHub Pages
+        if: github.event_name == 'push'
         uses: actions/configure-pages@v5
 
       - name: Upload Allure report to GitHub Pages
+        if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v3
         with:
           path: allure-report
 
       - name: Deploy Allure report to GitHub Pages
+        if: github.event_name == 'push'
         id: deployment
         uses: actions/deploy-pages@v4
