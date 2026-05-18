@@ -6,7 +6,11 @@ const FEATURE = 'Filters';
 const CATEGORY_SLUG = 'kutovi-shlifuvaljni-mashini-bolgarki';
 
 test.describe('@regression @catalog "With discount" filter', () => {
-  test('Activating "Зі знижкою" filter restricts the grid to discounted products only', async ({
+  // Will fail red until SCRUM-33 ships — that's intentional. allure-playwright
+  // doesn't emit results for fixme'd tests and test.fail() shows a green pass,
+  // both of which hide the bug. A real failing test is the only way to keep
+  // SCRUM-33 visible in the Allure report (categorised as "Product defects").
+  test('Activating "Зі знижкою" filter restricts the grid to discounted products only [SCRUM-33]', async ({
     page,
     catalogPage,
   }) => {
@@ -34,11 +38,6 @@ test.describe('@regression @catalog "With discount" filter', () => {
         },
       ],
     });
-
-    // Marked as expected failure while SCRUM-33 is open. When the server-side fix
-    // ships, this test will start passing and Playwright will flip it to "failed
-    // (expected to fail)" → remove the test.fail() line below.
-    test.fail();
 
     const baseline = await step('Open category without filter', async () => {
       await catalogPage.gotoSlug(CATEGORY_SLUG);
